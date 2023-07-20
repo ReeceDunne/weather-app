@@ -1,12 +1,10 @@
-// require("dotenv").config();
-// const API_KEY = process.env.REACT_APP_WEATHER_API_KEY;
-// const BASE_URL = process.env.REACT_APP_WEATHER_BASE_URL;
-// const ICON_URL = process.env.REACT_APP_WEATHER_BASE_URL;
+const API_KEY = process.env.REACT_APP_WEATHER_API_KEY;
+const BASE_URL = process.env.REACT_APP_WEATHER_BASE_URL;
+const ICON_URL = process.env.REACT_APP_WEATHER_ICON_URL;
 const { DateTime } = require("luxon");
-const API_KEY = "7ff4f6ca956a374be43b36fca46c0916";
-const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
 const getWeatherData = (infoType, searchParams) => {
+  console.log(BASE_URL);
   const url = new URL(BASE_URL + "/" + infoType);
 
   url.search = new URLSearchParams({
@@ -67,8 +65,7 @@ const formatToLocaleTime = (
   format = "cccc, dd LLL yyyy' | Local Time: 'hh:mm a"
 ) => DateTime.fromSeconds(secs).setZone(zone).toFormat(format);
 
-const iconUrlFromCode = (code) =>
-  `http://openweathermap.org/img/wn/${code}@2x.png`;
+const iconUrlFromCode = (icon) => `${ICON_URL}/${icon}@2x.png`;
 
 export default getFormattedWeatherData;
 export { formatToLocaleTime, iconUrlFromCode };

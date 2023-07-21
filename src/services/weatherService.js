@@ -4,17 +4,10 @@ const ICON_URL = process.env.REACT_APP_WEATHER_ICON_URL;
 const { DateTime } = require("luxon");
 
 const getWeatherData = (infoType, searchParams) => {
-  console.log(BASE_URL);
   const url = new URL(BASE_URL + "/" + infoType);
+  url.search = new URLSearchParams({ ...searchParams, appid: API_KEY });
 
-  url.search = new URLSearchParams({
-    ...searchParams,
-    appid: API_KEY,
-  });
-
-  return fetch(url)
-    .then((res) => res.json())
-    .then((data) => data);
+  return fetch(url).then((res) => res.json());
 };
 
 const formatCurrentWeather = (data) => {
@@ -43,11 +36,16 @@ const formatCurrentWeather = (data) => {
     country,
     sunrise,
     sunset,
-    weather,
-    speed,
     details,
     icon,
+    speed,
   };
+};
+
+const formatForecastWeather = (data) => {
+  let { timezone, daily, hourly } = data;
+
+  return { timezone, daily, hourly };
 };
 
 const getFormattedWeatherData = async (searchParams) => {
@@ -56,16 +54,26 @@ const getFormattedWeatherData = async (searchParams) => {
     searchParams
   ).then(formatCurrentWeather);
 
-  return { ...formattedCurrentWeather };
+  const { lat, lon } = formattedCurrentWeather;
+
+  const formattedForecastWeather = await getWeatherData("onecall", {
+    lat,
+    lon,
+    exclude: "current,minutely,alerts",
+    units: searchParams.units,
+  }).then(formatForecastWeather);
+
+  return { ...formattedCurrentWeather, ...formattedForecastWeather };
 };
 
 const formatToLocaleTime = (
   secs,
   zone,
-  format = "cccc, dd LLL yyyy' | Local Time: 'hh:mm a"
+  format = "cccc, dd LLL yyyy' | Local time: 'hh:mm a"
 ) => DateTime.fromSeconds(secs).setZone(zone).toFormat(format);
 
-const iconUrlFromCode = (icon) => `${ICON_URL}/${icon}@2x.png`;
+const iconUrlFromCode = (code) => `${ICON_URL}/${code}@2x.png`;
 
 export default getFormattedWeatherData;
+
 export { formatToLocaleTime, iconUrlFromCode };
